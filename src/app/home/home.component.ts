@@ -3,6 +3,7 @@ import { addDoc, collection } from 'firebase/firestore';
 import { FIRESTORE } from '../app.config';
 import { RoomService } from '../shared/room.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -11,7 +12,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
     <div class="div">
       <form
         [formGroup]="form"
-        (ngSubmit)="roomService.create$.next(usernameControll!.getRawValue())"
+        (ngSubmit)="roomService.create$.next(usernameControl!.getRawValue())"
         d
       >
         <label for="username">Username</label>
@@ -29,20 +30,20 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 })
 export default class HomeComponent {
   roomService = inject(RoomService);
+  router = inject(Router);
 
   form = inject(FormBuilder).group({
     username: ['', [Validators.required]],
   });
 
-  get usernameControll() {
+  get usernameControl() {
     return this.form.get('username');
   }
 
   constructor() {
     effect(() => {
       if (!!this.roomService.room()) {
-        //route to room component
-        console.log('routing too room...');
+        this.router.navigate(['room', this.roomService.room()?.uid]);
       }
     });
   }

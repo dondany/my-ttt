@@ -6,6 +6,10 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.component'),
   },
   {
+    path: 'room/:id',
+    loadComponent: () => import('./room/room.component'),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
