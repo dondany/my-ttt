@@ -1,5 +1,5 @@
 import { ApplicationConfig, InjectionToken } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { initializeApp } from 'firebase/app';
 import {
   Firestore,
@@ -43,5 +43,8 @@ export const FIRESTORE = new InjectionToken('Firebase firestore', {
 });
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideAnimations()],
+  providers: [
+    provideRouter(routes, withComponentInputBinding()),
+    provideAnimations(),
+  ],
 };
