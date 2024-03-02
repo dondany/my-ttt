@@ -66,6 +66,7 @@ export class RoomService {
     console.log(this.state().player === this.state().room?.currentPlayer);
     return this.state().player === this.state().room?.currentPlayer;
   });
+  player = computed(() => this.state().player);
 
   constructor() {
     connect(this.state)
