@@ -8,19 +8,23 @@ import {
   input,
 } from '@angular/core';
 
+// 'shadow-[5px_5px_0px_0px_#cac44d] bg-[#FBF46D]': symbol() === 'x',
+//         'shadow-[5px_5px_0px_0px_#5bc0b1] bg-[#77E4D4]': symbol() === 'o',
+//         'shadow-[5px_5px_0px_0px_#cbd5e1] bg-white': !symbol(),
+
 @Component({
   standalone: true,
   selector: 'app-field',
   template: `
-    <div
-      class="aspect-square bg-indigo-400 flex flex-col justify-center items-center 
-      select-none rounded"
+    <button
+      class="aspect-square size-full bg-indigo-400 flex flex-col justify-center items-center 
+      select-none rounded-lg border-b-4 border-r-4"
       [ngClass]="{
-        'hover:bg-slate-200': active() && !symbol(),
+        'hover:bg-slate-200 active:border-none': active() && !symbol(),
         'bg-slate-200 cursor-pointer': !symbol(),
-        'shadow-[5px_5px_0px_0px_#cac44d] bg-[#FBF46D]': symbol() === 'x',
-        'shadow-[5px_5px_0px_0px_#5bc0b1] bg-[#77E4D4]': symbol() === 'o',
-        'shadow-[5px_5px_0px_0px_#cbd5e1] bg-white': !symbol(),
+         'bg-[#FBF46D] border-[#cac44d]': symbol() === 'x',
+         'bg-[#77E4D4] border-[#5bc0b1]': symbol() === 'o',
+         'bg-white border-[#cbd5e1]' : !symbol(),
 
       }"
       (click)="onClick()"
@@ -28,7 +32,7 @@ import {
       <span class="material-symbols-outlined text-4xl">
         @if (symbol() === 'x') { close } @else if (symbol() === 'o') { circle }
       </span>
-    </div>
+    </button>
   `,
   imports: [CommonModule],
 })
