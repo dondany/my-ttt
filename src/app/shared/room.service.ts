@@ -26,6 +26,7 @@ export interface Room {
   uid: string;
   player1: string | null;
   player2: string | null;
+  winner: [];
   gameBoard: (string | null)[];
   currentPlayer: string | null;
 }
@@ -48,6 +49,7 @@ export class RoomService {
   joinRoom$ = new Subject<JoinRoomModel>();
   create$ = new Subject<string>();
   selectField$ = new Subject<number>();
+  reset$ = new Subject<void>();
 
   //state
   private state = signal<RoomState>({
@@ -60,26 +62,35 @@ export class RoomService {
 
   //selectors
   room = computed(() => this.state().room);
-  currentPlayer = computed(() => this.state().room!.currentPlayer);
+  currentPlayer = computed(() => this.state().room?.currentPlayer);
   gameBoard = computed(() => this.state().gameBoard);
   isActivePlayer = computed(() => {
-    console.log(this.state().player === this.state().room?.currentPlayer);
     return this.state().player === this.state().room?.currentPlayer;
   });
   player = computed(() => this.state().player);
+  winner = computed(() =>
+    !!this.state().room!.winner ? this.state().room!.winner : [-1, -1, -1]
+  );
 
   constructor() {
     connect(this.state)
       .with(
         this.create$.pipe(
           switchMap((player1) => this.createRoom(player1)),
-          tap((room) => localStorage.setItem(`room_${room.uid}`, '1')),
+          tap((room) => localStorage.setItem(`room_${room.uid}`, 'x')),
           map((room) => ({ room, gameBoard: room.gameBoard }))
         )
       )
       .with(
         this.selectField$.pipe(
           switchMap((i) => this.selectField(i)),
+          ignoreElements(),
+          catchError((error) => of(error))
+        )
+      )
+      .with(
+        this.reset$.pipe(
+          switchMap(() => this.reset()),
           ignoreElements(),
           catchError((error) => of(error))
         )
@@ -99,8 +110,8 @@ export class RoomService {
         player1,
         player2: null,
         gameBoard: [null, null, null, null, null, null, null, null, null],
-        currentPlayer: '1',
-        player: 1,
+        currentPlayer: 'x',
+        player: 'x',
       })
     ).pipe(
       switchMap((docRef) => docData(docRef, { idField: 'uid' }))
@@ -116,11 +127,69 @@ export class RoomService {
 
   private selectField(field: number) {
     const board = [...this.state().room!.gameBoard];
-    board[field] = this.currentPlayer() === '1' ? 'x' : 'o';
-    const player = this.currentPlayer() === '1' ? '2' : '1';
+    board[field] = this.currentPlayer()!;
+    const player = this.currentPlayer() === 'x' ? 'o' : 'x';
     const roomRef = doc(this.firestore, `rooms/${this.room()?.uid}`);
     return defer(() =>
-      updateDoc(roomRef, { gameBoard: board, currentPlayer: player })
+      updateDoc(roomRef, {
+        gameBoard: board,
+        currentPlayer: player,
+        winner: this.checkBoard(board),
+      })
     );
+  }
+
+  private reset() {
+    const roomRef = doc(this.firestore, `rooms/${this.room()?.uid}`);
+    return defer(() =>
+      updateDoc(roomRef, {
+        gameBoard: [null, null, null, null, null, null, null, null, null],
+        winner: [],
+        currentPlayer: 'x',
+      })
+    );
+  }
+
+  private checkBoard(board: (string | null)[]) {
+    console.log('checking..', board);
+    //check rows
+    for (let i = 0; i < 9; i += 3) {
+      if (
+        board[i] === this.currentPlayer() &&
+        board[i + 1] === this.currentPlayer() &&
+        board[i + 2] === this.currentPlayer()
+      ) {
+        return [i, i + 1, i + 2];
+      }
+    }
+
+    // Check columns
+    for (let i = 0; i < 3; i++) {
+      if (
+        board[i] === this.currentPlayer() &&
+        board[i + 3] === this.currentPlayer() &&
+        board[i + 6] === this.currentPlayer()
+      ) {
+        return [i, i + 3, i + 6];
+      }
+    }
+
+    // Check diagonals
+    if (
+      board[0] === this.currentPlayer() &&
+      board[4] === this.currentPlayer() &&
+      board[8] === this.currentPlayer()
+    ) {
+      return [0, 4, 8];
+    }
+
+    if (
+      board[2] === this.currentPlayer() &&
+      board[4] === this.currentPlayer() &&
+      board[6] === this.currentPlayer()
+    ) {
+      return [2, 4, 6];
+    }
+    return [];
   }
 }

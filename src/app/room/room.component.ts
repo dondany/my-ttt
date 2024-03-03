@@ -23,46 +23,55 @@ import { CommonModule } from '@angular/common';
         <app-field
           [symbol]="this.roomService.gameBoard()[0]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(0)"
           (selected)="roomService.selectField$.next(0)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[1]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(1)"
           (selected)="roomService.selectField$.next(1)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[2]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(2)"
           (selected)="roomService.selectField$.next(2)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[3]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(3)"
           (selected)="roomService.selectField$.next(3)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[4]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(4)"
           (selected)="roomService.selectField$.next(4)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[5]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(5)"
           (selected)="roomService.selectField$.next(5)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[6]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(6)"
           (selected)="roomService.selectField$.next(6)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[7]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(7)"
           (selected)="roomService.selectField$.next(7)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[8]"
           [active]="this.roomService.isActivePlayer()"
+          [winner]="this.roomService.winner().includes(8)"
           (selected)="roomService.selectField$.next(8)"
         />
         }
@@ -81,6 +90,7 @@ import { CommonModule } from '@angular/common';
           }
         </span>
       </p>
+      <button (click)="this.roomService.reset$.next()">Reset</button>
     </div>
   `,
   imports: [FieldComponent, CommonModule],
@@ -97,44 +107,7 @@ export default class RoomComponent implements OnInit {
     if (item) {
       this.roomService.joinRoom$.next({ id: this.id, player: item });
     } else {
-      this.roomService.joinRoom$.next({ id: this.id, player: '2' });
+      this.roomService.joinRoom$.next({ id: this.id, player: 'o' });
     }
   }
-
-  // checkBoard() {
-  //   //check rows
-  //   for (let i = 0; i < 9; i += 3) {
-  //     if (
-  //       this.gameBoard[i] === this.currentPlayer &&
-  //       this.gameBoard[i + 1] === this.currentPlayer &&
-  //       this.gameBoard[i + 2] === this.currentPlayer
-  //     ) {
-  //       return true;
-  //     }
-  //   }
-
-  //   // Check columns
-  //   for (let i = 0; i < 3; i++) {
-  //     if (
-  //       this.gameBoard[i] === this.currentPlayer &&
-  //       this.gameBoard[i + 3] === this.currentPlayer &&
-  //       this.gameBoard[i + 6] === this.currentPlayer
-  //     ) {
-  //       return true;
-  //     }
-  //   }
-
-  //   // Check diagonals
-  //   if (
-  //     (this.gameBoard[0] === this.currentPlayer &&
-  //       this.gameBoard[4] === this.currentPlayer &&
-  //       this.gameBoard[8] === this.currentPlayer) ||
-  //     (this.gameBoard[2] === this.currentPlayer &&
-  //       this.gameBoard[4] === this.currentPlayer &&
-  //       this.gameBoard[6] === this.currentPlayer)
-  //   ) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 }

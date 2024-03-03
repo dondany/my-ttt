@@ -17,7 +17,7 @@ import {
   selector: 'app-field',
   template: `
     <button
-      class="aspect-square size-full bg-indigo-400 flex flex-col justify-center items-center 
+      class="aspect-square size-full flex flex-col justify-center items-center 
       select-none rounded-lg border-b-4 border-r-4"
       [ngClass]="{
         'hover:bg-slate-200 active:border-none': active() && !symbol(),
@@ -25,6 +25,7 @@ import {
          'bg-[#FBF46D] border-[#cac44d]': symbol() === 'x',
          'bg-[#77E4D4] border-[#5bc0b1]': symbol() === 'o',
          'bg-white border-[#cbd5e1]' : !symbol(),
+         'bg-red-400 border-red-600 animate-pulse' : winner(),
 
       }"
       (click)="onClick()"
@@ -39,7 +40,14 @@ import {
 export class FieldComponent {
   symbol = input<string | null>(null);
   active = input<boolean>(false);
+  winner = input<boolean>(false);
   @Output('selected') selectedEventEmitter = new EventEmitter();
+
+  constructor() {
+    effect(() => {
+      console.log(this.winner());
+    });
+  }
 
   onClick() {
     if (!this.active() || !!this.symbol()) {
