@@ -24,8 +24,10 @@ export interface JoinRoomModel {
 
 export interface Room {
   uid: string;
-  player1: string | null;
-  player2: string | null;
+  playerX: string | null;
+  playerO: string | null;
+  playerXwins: number;
+  playerOwins: number;
   winnerFields: number[];
   winner: string;
   gameBoard: (string | null)[];
@@ -77,13 +79,24 @@ export class RoomService {
   winner = computed(() =>
     !!this.state().room ? this.state().room!.winner : null
   );
+  playerX = computed(() =>
+    !!this.state().room ? this.state().room!.playerX : null
+  );
+  playerO = computed(() =>
+    !!this.state().room ? this.state().room!.playerO : null
+  );
+  playerXwins = computed(() =>
+    !!this.state().room ? this.state().room!.playerXwins : null
+  );
+  playerOwins = computed(() =>
+    !!this.state().room ? this.state().room!.playerOwins : null
+  );
 
   constructor() {
     connect(this.state)
       .with(
         this.create$.pipe(
-          switchMap((player1) => this.createRoom(player1)),
-          tap((room) => localStorage.setItem(`room_${room.uid}`, 'x')),
+          switchMap((player) => this.createRoom(player)),
           map((room) => ({ room, gameBoard: room.gameBoard }))
         )
       )
@@ -109,26 +122,39 @@ export class RoomService {
       );
   }
 
-  private createRoom(player1: string) {
+  private createRoom(player: string) {
     const roomCollection = collection(this.firestore, 'rooms');
-    return from(
-      addDoc(roomCollection, {
-        player1,
-        player2: null,
-        gameBoard: [null, null, null, null, null, null, null, null, null],
-        currentPlayer: 'x',
-        player: 'x',
-      })
+    return (
+      from(
+        addDoc(roomCollection, {
+          playerX: player,
+          playerO: null,
+          playerXwins: 0,
+          playerOwins: 0,
+          gameBoard: [null, null, null, null, null, null, null, null, null],
+          currentPlayer: 'x',
+          player: 'x',
+        })
+      ).pipe(
+        switchMap((docRef) => docData(docRef, { idField: 'uid' }))
+      ) as Observable<Room>
     ).pipe(
-      switchMap((docRef) => docData(docRef, { idField: 'uid' }))
-    ) as Observable<Room>;
+      tap((room) => localStorage.setItem(`room_${room.uid}`, 'x')),
+      tap(() => localStorage.setItem(`ttt_username`, player))
+    );
   }
 
   private joinRoom(joinRoom: JoinRoomModel) {
     localStorage.setItem(`room_${joinRoom.id}`, joinRoom.player);
     this.state().player = joinRoom.player;
     const roomRef = doc(this.firestore, `rooms/${joinRoom.id}`);
-    return docData(roomRef, { idField: 'uid' }) as Observable<Room>;
+    return from(
+      updateDoc(roomRef, {
+        playerO: 'bot',
+      })
+    ).pipe(
+      switchMap(() => docData(roomRef, { idField: 'uid' }))
+    ) as Observable<Room>;
   }
 
   private selectField(field: number) {
@@ -136,14 +162,20 @@ export class RoomService {
     board[field] = this.currentPlayer()!;
     const player = this.currentPlayer() === 'x' ? 'o' : 'x';
     const roomRef = doc(this.firestore, `rooms/${this.room()?.uid}`);
-    console.log(this.checkBoard(board));
     const winnerFields = this.checkBoard(board);
+    const winner = winnerFields.length > 0 ? this.currentPlayer() : null;
+    const playerXwins =
+      winner == 'x' ? this.playerXwins()! + 1 : this.playerXwins()!;
+    const playerOwins =
+      winner == 'o' ? this.playerOwins()! + 1 : this.playerOwins()!;
     return defer(() =>
       updateDoc(roomRef, {
         gameBoard: board,
         currentPlayer: player,
         winnerFields: winnerFields,
-        winner: winnerFields.length > 0 ? this.currentPlayer() : null,
+        winner: winner,
+        playerXwins: playerXwins,
+        playerOwins: playerOwins,
       })
     );
   }

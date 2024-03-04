@@ -1,8 +1,7 @@
-import { Component, Input, OnInit, effect, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { RoomService } from '../shared/room.service';
 import { FieldComponent } from './ui/field.component';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -11,12 +10,35 @@ import { CommonModule } from '@angular/common';
     <div
       class="size-full flex flex-col items-center pt-12 gap-5 text-white font-mono"
     >
-      <span class="text-4xl">Tic Tac Toe</span>
-      <p class="flex flex-col">
-        <span [ngClass]="{ '': roomService.player() === '1' }"
-          >You are the '{{ roomService.player() === '1' ? 'x' : 'o' }}'</span
-        >
-      </p>
+      @if (roomService.playerX() && roomService.playerO()) {
+      <div class="flex justify-between items-center gap-3 text-black">
+        <div class="flex border rounded">
+          <span
+            class="px-2 py-2 text-white text-center material-symbols-outlined"
+            >close</span
+          >
+          <span class="w-44 bg-[#FBF46D] px-6 py-2">
+            {{ roomService.playerX() }}</span
+          >
+          <span class="px-2 py-2 text-white text-center">{{
+            roomService.playerXwins()
+          }}</span>
+        </div>
+        <span class="text-white">VS</span>
+        <div class="flex border rounded">
+          <span class="px-2 py-2 text-white text-center">{{
+            roomService.playerOwins()
+          }}</span>
+          <span class="w-44 bg-[#77E4D4] px-6 py-2 text-center">
+            {{ roomService.playerO() }}</span
+          >
+          <span
+            class="px-2 py-2 text-white text-center material-symbols-outlined"
+            >circle</span
+          >
+        </div>
+      </div>
+      }
       <!-- <h3>Winner is {{ winner }}</h3> -->
       <div class="w-64 h-64 grid grid-cols-3 gap-3">
         @if (!!roomService.room()) {
@@ -76,7 +98,12 @@ import { CommonModule } from '@angular/common';
         />
         }
       </div>
-      @if (!roomService.winner()) {
+
+      @if (!roomService.playerO()) {
+      <p>
+        <span>Waiting for other player to join...</span>
+      </p>
+      } @else if (!roomService.winner()) {
       <p>
         <span>
           @if (roomService.currentPlayer() === roomService.player()) {
@@ -100,7 +127,7 @@ import { CommonModule } from '@angular/common';
           (click)="this.roomService.reset$.next()"
           class="px-4 py-2 m-auto rounded-lg text-black bg-white hover:bg-slate-200 cursor-pointer border-b-4 border-r-4 border-[#cbd5e1]"
         >
-          Restart Game
+          Next Game
         </button>
       </p>
       }
