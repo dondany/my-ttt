@@ -23,59 +23,60 @@ import { CommonModule } from '@angular/common';
         <app-field
           [symbol]="this.roomService.gameBoard()[0]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(0)"
+          [winner]="this.roomService.winnerFields().includes(0)"
           (selected)="roomService.selectField$.next(0)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[1]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(1)"
+          [winner]="this.roomService.winnerFields().includes(1)"
           (selected)="roomService.selectField$.next(1)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[2]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(2)"
+          [winner]="this.roomService.winnerFields().includes(2)"
           (selected)="roomService.selectField$.next(2)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[3]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(3)"
+          [winner]="this.roomService.winnerFields().includes(3)"
           (selected)="roomService.selectField$.next(3)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[4]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(4)"
+          [winner]="this.roomService.winnerFields().includes(4)"
           (selected)="roomService.selectField$.next(4)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[5]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(5)"
+          [winner]="this.roomService.winnerFields().includes(5)"
           (selected)="roomService.selectField$.next(5)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[6]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(6)"
+          [winner]="this.roomService.winnerFields().includes(6)"
           (selected)="roomService.selectField$.next(6)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[7]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(7)"
+          [winner]="this.roomService.winnerFields().includes(7)"
           (selected)="roomService.selectField$.next(7)"
         />
         <app-field
           [symbol]="this.roomService.gameBoard()[8]"
           [active]="this.roomService.isActivePlayer()"
-          [winner]="this.roomService.winner().includes(8)"
+          [winner]="this.roomService.winnerFields().includes(8)"
           (selected)="roomService.selectField$.next(8)"
         />
         }
       </div>
+      @if (!roomService.winner()) {
       <p>
         <span>
           @if (roomService.currentPlayer() === roomService.player()) {
@@ -90,7 +91,19 @@ import { CommonModule } from '@angular/common';
           }
         </span>
       </p>
-      <button (click)="this.roomService.reset$.next()">Reset</button>
+      } @else {
+      <p class="flex flex-col gap-3">
+        <span class="text-4xl"
+          >'{{ roomService.winner() }}' is the winner!</span
+        >
+        <button
+          (click)="this.roomService.reset$.next()"
+          class="px-4 py-2 m-auto rounded-lg text-black bg-white hover:bg-slate-200 cursor-pointer border-b-4 border-r-4 border-[#cbd5e1]"
+        >
+          Restart Game
+        </button>
+      </p>
+      }
     </div>
   `,
   imports: [FieldComponent, CommonModule],

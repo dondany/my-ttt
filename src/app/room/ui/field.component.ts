@@ -43,12 +43,6 @@ export class FieldComponent {
   winner = input<boolean>(false);
   @Output('selected') selectedEventEmitter = new EventEmitter();
 
-  constructor() {
-    effect(() => {
-      console.log(this.winner());
-    });
-  }
-
   onClick() {
     if (!this.active() || !!this.symbol()) {
       return;

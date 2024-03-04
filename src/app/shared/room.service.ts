@@ -26,7 +26,8 @@ export interface Room {
   uid: string;
   player1: string | null;
   player2: string | null;
-  winner: [];
+  winnerFields: number[];
+  winner: string;
   gameBoard: (string | null)[];
   currentPlayer: string | null;
 }
@@ -68,8 +69,13 @@ export class RoomService {
     return this.state().player === this.state().room?.currentPlayer;
   });
   player = computed(() => this.state().player);
+  winnerFields = computed(() =>
+    !!this.state().room!.winnerFields
+      ? this.state().room!.winnerFields
+      : new Array<number>()
+  );
   winner = computed(() =>
-    !!this.state().room!.winner ? this.state().room!.winner : [-1, -1, -1]
+    !!this.state().room ? this.state().room!.winner : null
   );
 
   constructor() {
@@ -130,11 +136,14 @@ export class RoomService {
     board[field] = this.currentPlayer()!;
     const player = this.currentPlayer() === 'x' ? 'o' : 'x';
     const roomRef = doc(this.firestore, `rooms/${this.room()?.uid}`);
+    console.log(this.checkBoard(board));
+    const winnerFields = this.checkBoard(board);
     return defer(() =>
       updateDoc(roomRef, {
         gameBoard: board,
         currentPlayer: player,
-        winner: this.checkBoard(board),
+        winnerFields: winnerFields,
+        winner: winnerFields.length > 0 ? this.currentPlayer() : null,
       })
     );
   }
@@ -144,14 +153,14 @@ export class RoomService {
     return defer(() =>
       updateDoc(roomRef, {
         gameBoard: [null, null, null, null, null, null, null, null, null],
-        winner: [],
+        winnerFields: [],
+        winner: null,
         currentPlayer: 'x',
       })
     );
   }
 
   private checkBoard(board: (string | null)[]) {
-    console.log('checking..', board);
     //check rows
     for (let i = 0; i < 9; i += 3) {
       if (
