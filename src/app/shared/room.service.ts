@@ -65,7 +65,7 @@ export class RoomService {
 
   //selectors
   room = computed(() => this.state().room);
-  currentPlayer = computed(() => this.state().room?.currentPlayer);
+  currentPlayer = computed(() => this.state().room?.currentPlayer!);
   gameBoard = computed(() => this.state().gameBoard);
   isActivePlayer = computed(() => {
     return this.state().player === this.state().room?.currentPlayer;
@@ -163,11 +163,22 @@ export class RoomService {
     const player = this.currentPlayer() === 'x' ? 'o' : 'x';
     const roomRef = doc(this.firestore, `rooms/${this.room()?.uid}`);
     const winnerFields = this.checkBoard(board);
-    const winner = winnerFields.length > 0 ? this.currentPlayer() : null;
-    const playerXwins =
-      winner == 'x' ? this.playerXwins()! + 1 : this.playerXwins()!;
-    const playerOwins =
-      winner == 'o' ? this.playerOwins()! + 1 : this.playerOwins()!;
+
+    let winner: string | null = null;
+    let playerXwins = this.playerXwins()!;
+    let playerOwins = this.playerOwins()!;
+    if (winnerFields.includes(-1)) {
+      winner = 'tie';
+    } else {
+      winner = winnerFields.length > 0 ? this.currentPlayer() : null;
+    }
+    if (winner == 'x') {
+      playerXwins++;
+    }
+    if (winner == 'o') {
+      playerOwins++;
+    }
+
     return defer(() =>
       updateDoc(roomRef, {
         gameBoard: board,
@@ -231,6 +242,11 @@ export class RoomService {
     ) {
       return [2, 4, 6];
     }
+
+    if (!board.includes(null)) {
+      return [-1];
+    }
+
     return [];
   }
 }

@@ -40,7 +40,7 @@ import { FieldComponent } from './ui/field.component';
       </div>
       }
       <!-- <h3>Winner is {{ winner }}</h3> -->
-      <div class="w-64 h-64 grid grid-cols-3 gap-3">
+      <div class="w-64 h-64 mt-8 grid grid-cols-3 gap-3">
         @if (!!roomService.room()) {
         <app-field
           [symbol]="this.roomService.gameBoard()[0]"
@@ -120,9 +120,19 @@ import { FieldComponent } from './ui/field.component';
       </p>
       } @else {
       <p class="flex flex-col gap-3">
+        @if (roomService.winner() == 'tie') {
+        <span class="text-4xl">It's a tie!</span>
+        } @else {
         <span class="text-4xl"
-          >'{{ roomService.winner() }}' is the winner!</span
+          >{{
+            roomService.winner() === 'x'
+              ? roomService.playerX()
+              : roomService.playerO()
+          }}
+          is the winner!</span
         >
+        }
+
         <button
           (click)="this.roomService.reset$.next()"
           class="px-4 py-2 m-auto rounded-lg text-black bg-white hover:bg-slate-200 cursor-pointer border-b-4 border-r-4 border-[#cbd5e1]"
