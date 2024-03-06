@@ -2,6 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { RoomService } from '../shared/room.service';
 import { FieldComponent } from './ui/field.component';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   standalone: true,
@@ -10,7 +16,21 @@ import { FieldComponent } from './ui/field.component';
     <div
       class="size-full flex flex-col items-center pt-12 gap-5 text-white font-mono"
     >
-      @if (roomService.playerX() && roomService.playerO()) {
+      @if (!roomService.room()) {
+      <form
+        [formGroup]="form"
+        (ngSubmit)="
+          this.roomService.joinRoom$.next({
+            id: this.id,
+            player: 'o',
+            username: usernameControl.getRawValue()
+          })
+        "
+      >
+        <input type="text" formControlName="username" />
+        <button type="submit">Start</button>
+      </form>
+      } @else { @if (roomService.playerX() && roomService.playerO()) {
       <div class="flex justify-between items-center gap-3 text-black">
         <div class="flex border rounded">
           <span
@@ -140,10 +160,10 @@ import { FieldComponent } from './ui/field.component';
           Next Game
         </button>
       </p>
-      }
+      } }
     </div>
   `,
-  imports: [FieldComponent, CommonModule],
+  imports: [FieldComponent, CommonModule, ReactiveFormsModule, FormsModule],
 })
 export default class RoomComponent implements OnInit {
   @Input() id = '';
@@ -152,12 +172,21 @@ export default class RoomComponent implements OnInit {
 
   winner: string | null = null;
 
+  form = inject(FormBuilder).group({
+    username: ['', [Validators.required]],
+  });
+
+  get usernameControl() {
+    return this.form.get('username')!;
+  }
+
   ngOnInit(): void {
     const item = localStorage.getItem(`room_${this.id}`);
     if (item) {
       this.roomService.joinRoom$.next({ id: this.id, player: item });
-    } else {
-      this.roomService.joinRoom$.next({ id: this.id, player: 'o' });
     }
+    //  else {
+    //   this.roomService.joinRoom$.next({ id: this.id, player: 'o' });
+    // }
   }
 }

@@ -20,6 +20,7 @@ import { docData } from 'rxfire/firestore';
 export interface JoinRoomModel {
   id: string;
   player: string;
+  username?: string;
 }
 
 export interface Room {
@@ -145,12 +146,13 @@ export class RoomService {
   }
 
   private joinRoom(joinRoom: JoinRoomModel) {
+    console.log('joining', joinRoom);
     localStorage.setItem(`room_${joinRoom.id}`, joinRoom.player);
     this.state().player = joinRoom.player;
     const roomRef = doc(this.firestore, `rooms/${joinRoom.id}`);
     return from(
       updateDoc(roomRef, {
-        playerO: 'bot',
+        playerO: joinRoom.username ? joinRoom.username : '??',
       })
     ).pipe(
       switchMap(() => docData(roomRef, { idField: 'uid' }))
